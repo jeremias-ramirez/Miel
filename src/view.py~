@@ -1,0 +1,78 @@
+from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QMainWindow, QVBoxLayout, QLabel
+from PyQt5.QtWidgets import QPushButton
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtWidgets import QTableWidget,QTableWidgetItem
+import model
+
+class App(QWidget):
+    #dataFrameDir = ""
+    #dfList = []
+    
+    def __init__(self):
+        super().__init__()
+        self.title = 'Buscador de combinación óptima.'
+        self.left = 20
+        self.top =  20 
+        self.width = 630
+        self.height = 480
+        
+        self.initUI()
+    
+    def initUI(self):
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.left, self.top, self.width, self.height)
+        self.showGUI()
+    
+    def loadDataFrameDir(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        self.dataFrameDir, _ = QFileDialog.getOpenFileName(self,"Selección del archivo Excel", "","Excel Files (*.xlsx)", options=options)
+        if self.dataFrameDir:
+            print(self.dataFrameDir)
+            self.setDataFrame()
+            self.createDataFrameTable()
+
+            #self.cntOptimal = model.algoritmoPuLP(dataFrameDir) 
+
+    def setDataFrame(self):
+           print(self.dataFrameDir)
+           self.dfList =  model.getDataFrame(self.dataFrameDir)
+        
+    def createDataFrameTable(self):
+        self.dfTable.clear()
+        self.dfTable.setRowCount(len(self.dfList))
+        self.dfTable.setColumnCount(len(self.dfList[0]))
+        for i in range(len(self.dfList)):
+            for j in range(len(self.dfList[0])):
+                self.dfTable.setItem(i,j,QTableWidgetItem(str(self.dfList[i][j])))
+        self.dfTable.horizontalHeader().hide()
+        self.dfTable.verticalHeader().hide()
+         
+    #for i in reversed(range(layout.count())): 
+    #layout.itemAt(i).widget().setParent(None)
+
+    def showGUI(self):
+        self.vBox = QVBoxLayout()
+        self.setLayout(self.vBox)
+
+        l0 = QLabel()
+        l0.setText("Datos Cargados")
+        self.vBox.addWidget(l0)
+        
+        self.dfTable = QTableWidget()
+        self.vBox.addWidget(self.dfTable)
+
+        ldf = QPushButton('Cargar Datos')
+        ldf.clicked.connect(self.loadDataFrameDir)
+        self.vBox.addWidget(ldf)
+        self.vBox.addStretch()
+
+        qbtn = QPushButton('Salir')
+        qbtn.clicked.connect(QCoreApplication.instance().quit)
+        
+        self.vBox.addWidget(qbtn)
+
+        self.show()
+
+
